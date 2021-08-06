@@ -1,9 +1,16 @@
 augroup Terminal_gf_mapping
   autocmd!
-  autocmd TermOpen * nnoremap <silent> <buffer> gf :call better_gf#OpenfileInTopBuffer( expand('<cWORD>') )<CR>
+  autocmd TermOpen * nnoremap <silent> <buffer> gf :call better_gf#OpenfileInNormalBuffer( expand('<cWORD>') )<CR>
+  autocmd TermOpen * vnoremap <silent> <buffer> gf :call better_gf#OpenfileInNormalBuffer( better_gf#GetVisualSelection() )<CR>
+
+  " with a capital is to create if it doesn't exist yet
+  autocmd TermOpen * nnoremap <silent> <buffer> gF :call better_gf#CreatefileInNormalBuffer( expand('<cWORD>') )<CR>
+  autocmd TermOpen * vnoremap <silent> <buffer> gF :call better_gf#CreatefileInNormalBuffer( better_gf#GetVisualSelection() )<CR>
 augroup END
 
-vnoremap <silent> gf :call better_gf#OpenfileInTopBuffer( better_gf#GetVisualSelection() )<CR>
+vnoremap <silent> gf :call better_gf#Openfile( better_gf#GetVisualSelection() )<CR>
+nnoremap <silent> gf :call better_gf#Openfile( expand('<cWORD>') )<CR>
 
 " with a capital is to create if it doesn't exist yet
-noremap gF :e <cfile><cr>
+nnoremap <silent> gF :call better_gf#Createfile( expand('<cWORD>') )<CR>
+vnoremap <silent> gF :call better_gf#Createfile( better_gf#GetVisualSelection() )<CR>

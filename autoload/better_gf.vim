@@ -1,72 +1,96 @@
 " Open file at position from compiler error on the terminal
+
 " e.g. foobar.adb:27:2: "X" not declared in "Y"
-" results in opening foobar.adb in the top buffer (not the terminal), and issuing '27G2|'
+" results in opening foobar.adb in the other, non-terminal buffer,
+" and jumping to the place mentioned by issuing '27G2|'
+
 " Default vim comes close with 'vt:<C-W>gf' - but:
 " 1) including the [colon][linenumber] suffix does not work as intended in NeoVim
 " 2) this does not include the column, 
-" 3) you cannot reuse the top window.
+" 3) it opens in the terminal window, which is inconvenient
 
-" TODO strip common parts of current path so that when I am somewhere deeper
-" in my project, I can still gf to a file path specified from the root of that
-" project
-fu! better_gf#OpenfileInTopBuffer(s)
-  let selection=a:s
-  if selection[0]=='"'
-    let selection=selection[1:]
+fu! better_gf#GetFileLocation(s) abort
+  let l:selection=a:s
+  " Strip one leading quote, some trailing quotes and commas
+  let l:selection=substitute(l:selection, '^"\?\([^,"]*\)\([",]*\)\?$', '\1', '')
+  " Strip leading ./ if present
+  let l:selection=substitute(l:selection, '^./', '', '')
+  " TODO strip common parts of current path so that when I am somewhere deeper
+  " in my project, I can still gf to a file path specified from the root of that
+  " project
+  if has('win32')
+    if selection[1]==':'
+      " One letter directory assumed to be drivename under windows
+      " so we shift everything over one spot but still have the drivename
+      " inside the filename
+      let drivename=selection[0:1]
+      let elements=split(selection[2:], ':')
+      let elements[0]=drivename..elements[0]
+      return elements
+    endif
   endif
-  if selection[-1]==','
-    let selection=selection[:-1]
+  return split(selection, ':')
+endfunction
+
+fu! better_gf#OpenfileInNormalBuffer(s) abort
+  call better_gf#JumpToNormalBuffer()
+  call better_gf#Openfile(a:s)
+endfunction
+
+fu! better_gf#JumpToNormalBuffer() abort
+  if &buftype !=# 'terminal'
+    return
   endif
-  if selection[-1]=='"'
-    let selection=selection[:-1]
-  endif
-  if selection[1:1]==':'
-    " One letter directory assumed to be drivename under windows
-    let elements=split(selection[2:], ':')
-    let elements[0]=selection[0:1]..elements[0]
-  else
-    let elements=split(selection, ':')
-  endif
-  let elementlen=len(elements)
-  let filename=elements[0]
-  if matchstr(filename, "^.*\\..*$")=="" " doesn't look like filename (. missing)
-    if input("Really open "..filename.."? (y/n)")!="y"
+  let l:first_window_number = winnr()
+  while v:true
+    execute "wincmd W"
+    if &buftype !=# 'terminal'
       return
     endif
-  endif
-  if elementlen > 1
-    let line=elements[1]
-    if matchstr(line, "^[0-9]*$")=="" " line is not a number
-      let elementlen=1
+    if winnr() == l:first_window_number
+      break
     endif
-    if elementlen > 2
-      let column=elements[2]
-      if matchstr(column, "^[0-9]*$")=="" " column is not a number
-        let elementlen=2
+  endwhile
+  " Unable to find non-terminal window in current tab, create a new split
+  execute 'sp'
+endfunction
+
+fu! better_gf#Openfile(s) abort
+  let l:elements=better_gf#GetFileLocation(a:s)
+  echom l:elements
+  let l:elementlen=len(l:elements)
+  let l:filename=l:elements[0]
+  if l:elementlen > 1
+    let l:line=l:elements[1]
+    if matchstr(l:line, "^[0-9]*$")=="" " line is not a number, ignore line & column number
+      let l:elementlen=1
+    endif
+    if l:elementlen > 2
+      let l:column=l:elements[2]
+      if matchstr(l:column, "^[0-9]*$")=="" " column is not a number, only use line number
+        let l:elementlen=2
       endif
     endif
   endif
-  " switch to top buffer
-  silent execute 'wincmd k'
   " get rid of localdir if present
   if haslocaldir()
     execute 'cd' getcwd(-1)
   endif
   try
     " find the file 
-    if elementlen > 1
+    if l:elementlen > 1
       " keepjumps ensures the top of the file is not added to the jumplist
-      silent execute 'keepjumps find ' . filename
+      silent execute 'keepjumps find ' . l:filename
     else
-      silent execute 'find ' . filename
+      silent execute 'find ' . l:filename
       return
     endif
-    if elementlen >= 3
+    if l:elementlen >= 3
       " go to the indicated line and column
-      silent execute 'normal! ' . line . 'G' . column . '|'
-    else " elementlen == 2
+      silent execute 'normal! ' . l:line . 'G' . l:column . '|'
+    else " l:elementlen == 2
       " go to the indicated line
-      silent execute 'normal! ' . line . 'G'
+      silent execute 'normal! ' . l:line . 'G'
     endif
   endtry
 endfunction
@@ -78,5 +102,16 @@ function! better_gf#GetVisualSelection()
   let text = @"
   call setreg(reg, save_reg, save_type)
   return text
+endfunction
+
+function! better_gf#CreatefileInNormalBuffer(s)
+  call better_gf#JumpToNormalBuffer()
+  call better_gf#Createfile(a:s)
+endfunction
+
+function! better_gf#Createfile(s)
+  let l:elements = better_gf#GetFileLocation(a:s) 
+  let l:filename=l:elements[0]
+  silent execute 'e ' . l:filename
 endfunction
 
