@@ -57,7 +57,6 @@ endfunction
 
 fu! better_gf#Openfile(s) abort
   let l:elements=better_gf#GetFileLocation(a:s)
-  echom l:elements
   let l:elementlen=len(l:elements)
   let l:filename=l:elements[0]
   if l:elementlen > 1
