@@ -18,18 +18,19 @@ fu! better_gf#GetFileLocation(s) abort
   " TODO strip common parts of current path so that when I am somewhere deeper
   " in my project, I can still gf to a file path specified from the root of that
   " project
-  if has('win32')
-    if selection[1]==':'
-      " One letter directory assumed to be drivename under windows
-      " so we shift everything over one spot but still have the drivename
-      " inside the filename
-      let drivename=selection[0:1]
-      let elements=split(selection[2:], ':')
-      let elements[0]=drivename..elements[0]
-      return elements
-    endif
+  if has('win32') && selection[1]==':'
+    " One letter directory assumed to be drivename under windows
+    " so we shift everything over one spot but still have the drivename
+    " inside the filename
+    let drivename=selection[0:1]
+    let l:elements=split(selection[2:], ':')
+    let l:elements[0]=drivename..l:elements[0]
+  else
+    let l:elements=split(selection, ':')
   endif
-  return split(selection, ':')
+  " unnecessary!
+  " let l:elements[0]=substitute(l:elements[0], '$HOME', '~', '')
+  return l:elements
 endfunction
 
 fu! better_gf#OpenfileInNormalBuffer(s) abort
