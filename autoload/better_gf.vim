@@ -15,9 +15,13 @@ fu! better_gf#GetFileLocation(s) abort
   let l:selection=substitute(l:selection, '^"\?\([^,"]*\)\([",]*\)\?$', '\1', '')
   " Strip leading ./ if present
   let l:selection=substitute(l:selection, '^./', '', '')
+  " Replace filename(30) with filename:30
+  let l:selection=substitute(l:selection, '(\([0-9][0-9]*\))', ':\1', '')
+
   " TODO strip common parts of current path so that when I am somewhere deeper
   " in my project, I can still gf to a file path specified from the root of that
   " project
+
   if has('win32') && selection[1]==':'
     " One letter directory assumed to be drivename under windows
     " so we shift everything over one spot but still have the drivename
