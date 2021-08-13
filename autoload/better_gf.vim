@@ -14,7 +14,7 @@ fu! better_gf#GetFileLocation(s) abort
   " Strip one leading quote, some trailing quotes and commas
   let l:selection=substitute(l:selection, '^"\?\([^,"]*\)\([",]*\)\?$', '\1', '')
   " Strip leading ./ if present
-  let l:selection=substitute(l:selection, '^./', '', '')
+  let l:selection=substitute(l:selection, '^\./', '', '')
   " Replace filename(30) with filename:30
   let l:selection=substitute(l:selection, '(\([0-9][0-9]*\))', ':\1', '')
 
