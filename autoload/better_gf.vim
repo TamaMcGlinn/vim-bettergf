@@ -68,7 +68,7 @@ fu! better_gf#JumpToNormalBuffer() abort
   execute 'sp'
 endfunction
 
-fu! better_gf#Openfile(s, line) abort
+fu! better_gf#Openfile(s, line='') abort
   let l:elements=better_gf#GetFileLocation(a:s, a:line)
   let l:elementlen=len(l:elements)
   let l:filename=l:elements[0]
