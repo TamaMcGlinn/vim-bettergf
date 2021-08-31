@@ -9,7 +9,7 @@
 " 2) this does not include the column, 
 " 3) it opens in the terminal window, which is inconvenient
 
-fu! better_gf#GetFileLocation(s) abort
+fu! better_gf#GetFileLocation(s, line) abort
   let l:selection=a:s
   " Strip one leading quote, some trailing quotes and commas
   let l:selection=substitute(l:selection, '^"\?\([^,"]*\)\([",]*\)\?$', '\1', '')
@@ -32,14 +32,22 @@ fu! better_gf#GetFileLocation(s) abort
   else
     let l:elements=split(selection, ':')
   endif
-  " unnecessary!
-  " let l:elements[0]=substitute(l:elements[0], '$HOME', '~', '')
+
+  let l:elementlen=len(l:elements)
+  if l:elementlen == 1
+    if a:line =~? '.* line [0-9]*'
+      let l:line_nr=substitute(a:line, '\c.* line \([0-9]*\).*', '\1', '')
+      let l:elements = l:elements + [l:line_nr]
+    endif
+  endif
+
   return l:elements
 endfunction
 
 fu! better_gf#OpenfileInNormalBuffer(s) abort
+  let l:line=getline('.')
   call better_gf#JumpToNormalBuffer()
-  call better_gf#Openfile(a:s)
+  call better_gf#Openfile(a:s, l:line)
 endfunction
 
 fu! better_gf#JumpToNormalBuffer() abort
@@ -60,8 +68,8 @@ fu! better_gf#JumpToNormalBuffer() abort
   execute 'sp'
 endfunction
 
-fu! better_gf#Openfile(s) abort
-  let l:elements=better_gf#GetFileLocation(a:s)
+fu! better_gf#Openfile(s, line) abort
+  let l:elements=better_gf#GetFileLocation(a:s, a:line)
   let l:elementlen=len(l:elements)
   let l:filename=l:elements[0]
   if l:elementlen > 1
