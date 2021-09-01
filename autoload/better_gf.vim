@@ -9,7 +9,7 @@
 " 2) this does not include the column, 
 " 3) it opens in the terminal window, which is inconvenient
 
-fu! better_gf#GetFileLocation(s, line) abort
+fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=a:s
   " Strip one leading quote, some trailing quotes and commas
   let l:selection=substitute(l:selection, '^"\?\([^,"]*\)\([",]*\)\?$', '\1', '')
