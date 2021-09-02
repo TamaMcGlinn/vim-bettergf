@@ -69,7 +69,16 @@ fu! better_gf#JumpToNormalBuffer() abort
 endfunction
 
 fu! better_gf#Openfile(s, line='') abort
-  let l:elements=better_gf#GetFileLocation(a:s, a:line)
+  let l:filename = a:s
+  if &ft == 'git'
+    " fugitive buffers sometimes mention files with a/ or b/ prefix
+    " but if there is a directory or file with exactly this name,
+    " we still prefer that, so we skip this prefix-stripping
+    if !isdirectory(l:filename) && !filereadable(l:filename)
+      let l:filename = substitute(l:filename, '^[ab]/', '', '')
+    endif
+  endif
+  let l:elements=better_gf#GetFileLocation(l:filename, a:line)
   let l:elementlen=len(l:elements)
   let l:filename=l:elements[0]
   if l:elementlen > 1
