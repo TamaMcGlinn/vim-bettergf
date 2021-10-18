@@ -11,7 +11,10 @@
 
 fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=a:s
-  " Strip one leading quote, some trailing quotes and commas
+  " Strip leading and trailing single quotes
+  let l:selection=substitute(l:selection, "^'", '', '')
+  let l:selection=substitute(l:selection, "'$", '', '')
+  " Strip one leading double quote, some trailing quotes and commas
   let l:selection=substitute(l:selection, '^"\?\([^,"]*\)\([",]*\)\?$', '\1', '')
   " Strip leading ./ if present
   let l:selection=substitute(l:selection, '^\./', '', '')
