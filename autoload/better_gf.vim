@@ -1,14 +1,3 @@
-" Open file at position from compiler error on the terminal
-
-" e.g. foobar.adb:27:2: "X" not declared in "Y"
-" results in opening foobar.adb in the other, non-terminal buffer,
-" and jumping to the place mentioned by issuing '27G2|'
-
-" Default vim comes close with 'vt:<C-W>gf' - but:
-" 1) including the [colon][linenumber] suffix does not work as intended in NeoVim
-" 2) this does not include the column, 
-" 3) it opens in the terminal window, which is inconvenient
-
 fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=a:s
   " Strip leading .*=
