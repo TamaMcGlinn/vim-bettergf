@@ -1,3 +1,12 @@
+fu! better_gf#HandleCustomReplacements(s) abort
+  let l:s = a:s
+  let l:replacements = get(g:, 'bettergf_magic_replacements', [])
+  for l:r in l:replacements
+    let l:s = substitute(l:s, l:r[0], l:r[1], l:r[2])
+  endfor
+  return l:s
+endfunction
+
 fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=a:s
   " Strip leading .*=
@@ -17,6 +26,8 @@ fu! better_gf#GetFileLocation(s, line='') abort
   " TODO strip common parts of current path so that when I am somewhere deeper
   " in my project, I can still gf to a file path specified from the root of that
   " project
+  
+  let l:selection=better_gf#HandleCustomReplacements(l:selection)
 
   if has('win32') && selection[1]==':'
     " One letter directory assumed to be drivename under windows

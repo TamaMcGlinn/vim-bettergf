@@ -21,3 +21,15 @@ you could write `source ~/vimrc/newfile.vim` and then immediately gF on that to 
 See also https://github.com/TamaMcGlinn/vim-sanergx for a similar fix for gx,
 opening URLs in the browser.
 
+# Customization
+
+You can specify custom replacements inside the path, which is useful, for example, if your
+error messages are coming from a dockerized script, which has the script mounted elsewhere
+than on your own machine. For instance, if you want to replace '/docker_root/' with '' before
+trying to open the file, put this in your vimrc:
+
+```
+let g:bettergf_magic_replacements = [['/docker_root/', '', '']]
+```
+
+The three parameters in each replacement are simply passed on to vim's substitute() function.
