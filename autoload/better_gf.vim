@@ -54,7 +54,7 @@ endfunction
 fu! better_gf#OpenfileInNormalBuffer(s) abort
   let l:line=getline('.')
   call better_gf#JumpToNormalBuffer()
-  call better_gf#Openfile(a:s, l:line)
+  call better_gf#Openfile(a:s, v:true, l:line)
 endfunction
 
 fu! better_gf#JumpToNormalBuffer() abort
@@ -75,9 +75,9 @@ fu! better_gf#JumpToNormalBuffer() abort
   execute 'sp'
 endfunction
 
-fu! better_gf#Openfile(s, line='') abort
+fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
   let l:filename = a:s
-  if &ft == 'git'
+  if a:fromterminal || &ft == 'git'
     " fugitive buffers sometimes mention files with a/ or b/ prefix
     " but if there is a directory or file with exactly this name,
     " we still prefer that, so we skip this prefix-stripping
