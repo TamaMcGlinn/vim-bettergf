@@ -8,6 +8,12 @@ fu! better_gf#HandleCustomReplacements(s) abort
 endfunction
 
 fu! better_gf#GetFileLocation(s, line='') abort
+  if a:line =~ "^Plug '[^/~][^/~]*/[^/]*'"
+    let l:plugin_dir = substitute(substitute(a:line, "^Plug '.*/", '~/.vim/plugged/', ''), "'.*$", '/', '')
+    echom "Opening " . l:plugin_dir
+    execute ":e " . l:plugin_dir
+    return []
+  endif
   let l:selection=a:s
   " Strip leading .*=
   let l:selection=substitute(l:selection, ".*=", '', '')
@@ -87,6 +93,9 @@ fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
   endif
   let l:elements=better_gf#GetFileLocation(l:filename, a:line)
   let l:elementlen=len(l:elements)
+  if l:elementlen == 0
+    return
+  endif
   let l:filename=l:elements[0]
   if l:elementlen > 1
     let l:line=l:elements[1]

@@ -15,11 +15,25 @@ and jumping to the place mentioned by issuing '27G2|' (i.e. it also goes to the 
 3) this does not include the column, 
 4) it opens in the terminal window, which is inconvenient
 
+### create files
+
 `gF` is also mapped, to create the file at exactly that location. For instance,
 you could write `source ~/vimrc/newfile.vim` and then immediately gF on that to create the file.
 
-See also https://github.com/TamaMcGlinn/vim-sanergx for a similar fix for gx,
-opening URLs in the browser.
+### open plugins
+
+In addition, gf on a line such as:
+
+```
+Plug 'AndrewRadev/switch.vim'
+```
+
+opens `~/.vim/plugged/switch.vim`
+
+### See also
+
+[SanerGX](https://github.com/TamaMcGlinn/vim-sanergx) is a similar plugin,
+opening URLs in the browser. gx on the plugin line above opens the github page for the plugin.
 
 # Customization
 
