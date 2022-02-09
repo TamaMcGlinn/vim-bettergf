@@ -14,7 +14,14 @@ fu! better_gf#GetFileLocation(s, line='') abort
     execute ":e " . l:plugin_dir
     return []
   endif
+
   let l:selection=a:s
+  " Strip trailing ;
+  let l:selection=substitute(l:selection, ";$", '', '')
+  " Strip trailing )
+  let l:selection=substitute(l:selection, ")$", '', '')
+  " Strip leading (
+  let l:selection=substitute(l:selection, "^(", '', '')
   " Strip leading .*=
   let l:selection=substitute(l:selection, ".*=", '', '')
   " Strip leading .*[]
@@ -34,7 +41,6 @@ fu! better_gf#GetFileLocation(s, line='') abort
   " project
   
   let l:selection=better_gf#HandleCustomReplacements(l:selection)
-
   if has('win32') && selection[1]==':'
     " One letter directory assumed to be drivename under windows
     " so we shift everything over one spot but still have the drivename
