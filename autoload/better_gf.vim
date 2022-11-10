@@ -26,6 +26,8 @@ fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=substitute(l:selection, ".*[\]\[]", '', '')
   " Strip leading (
   let l:selection=substitute(l:selection, "^(", '', '')
+  " Strip leading .*|
+  let l:selection=substitute(l:selection, "^.*|", '', '')
   " Strip leading and trailing single quotes
   let l:selection=substitute(l:selection, "^'", '', '')
   let l:selection=substitute(l:selection, "'$", '', '')
