@@ -18,8 +18,8 @@ fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=a:s
   " Strip trailing ;
   let l:selection=substitute(l:selection, ";$", '', '')
-  " Strip trailing )
-  let l:selection=substitute(l:selection, ")$", '', '')
+  " Strip trailing characters ).";'
+  let l:selection=substitute(l:selection, "[)\.\";']*$", '', '')
   " Strip leading .*=
   let l:selection=substitute(l:selection, ".*=", '', '')
   " Strip leading .*[]
