@@ -89,6 +89,16 @@ fu! better_gf#JumpToNormalBuffer() abort
   execute 'sp'
 endfunction
 
+" https://vi.stackexchange.com/questions/29056/how-to-find-first-item-that-satisfies-predicate
+function! s:FindItem(object, Fn) abort
+    return get(filter(copy(a:object), "a:Fn(v:val)"), 0, v:null)
+endfunction
+
+" https://vi.stackexchange.com/a/29063/18875
+fu! s:EndsWith(longer, shorter) abort
+  return a:longer[len(a:longer)-len(a:shorter):] ==# a:shorter
+endfunction
+
 fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
   let l:filename = a:s
   if a:fromterminal || &ft == 'git'
@@ -122,6 +132,13 @@ fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
     execute 'cd' getcwd(-1)
   endif
   try
+    if exists('*MruGetFiles')
+      let l:mru = MruGetFiles()
+      let l:match = s:FindItem(l:mru, {item -> s:EndsWith(item, l:filename)})
+      if l:match isnot v:null
+        let l:filename = l:match
+      endif
+    endif
     " find the file 
     if l:elementlen > 1
       " keepjumps ensures the top of the file is not added to the jumplist
