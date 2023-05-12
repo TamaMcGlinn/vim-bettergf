@@ -99,6 +99,10 @@ fu! s:EndsWith(longer, shorter) abort
   return a:longer[len(a:longer)-len(a:shorter):] ==# a:shorter
 endfunction
 
+fu! s:Contains(longer, short) abort
+  return stridx(a:longer, a:short) >= 0
+endfunction
+
 fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
   let l:filename = a:s
   if a:fromterminal || &ft == 'git'
@@ -134,7 +138,8 @@ fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
   try
     if exists('*MruGetFiles')
       let l:mru = MruGetFiles()
-      let l:match = s:FindItem(l:mru, {item -> s:EndsWith(item, l:filename)})
+      let l:cwd = getcwd(-1) . "/"
+      let l:match = s:FindItem(l:mru, {item -> s:Contains(item, l:cwd) && s:EndsWith(item, l:filename)})
       if l:match isnot v:null
         let l:filename = l:match
       endif
