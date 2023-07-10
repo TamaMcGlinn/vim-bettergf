@@ -67,26 +67,32 @@ endfunction
 
 fu! better_gf#OpenfileInNormalBuffer(s) abort
   let l:line=getline('.')
-  call better_gf#JumpToNormalBuffer()
   call better_gf#Openfile(a:s, v:true, l:line)
 endfunction
 
-fu! better_gf#JumpToNormalBuffer() abort
+" Jump to buffer open in same window that
+" is not a terminal, or create a split if there is none
+" prefer splits with given extension
+fu! better_gf#JumpToNormalBuffer(preferred_extension) abort
   if &buftype !=# 'terminal'
     return
   endif
-  let l:first_window_number = winnr()
-  while v:true
-    execute "wincmd W"
-    if &buftype !=# 'terminal'
-      return
-    endif
-    if winnr() == l:first_window_number
-      break
-    endif
-  endwhile
-  " Unable to find non-terminal window in current tab, create a new split
-  execute 'sp'
+  " get non-terminal windows in current tab
+  let current_tab = tabpagenr()
+  let windows = map(filter(getwininfo(),
+        \ 'v:val["terminal"] == 0 && v:val["tabnr"] == ' .. l:current_tab), 
+        \ '{"winid": v:val["winid"], "bufname": bufname(v:val["bufnr"])}')
+  let same_extension = filter(copy(l:windows), 'substitute(v:val["bufname"], "^.*\\.", "", "") ==? "' .. a:preferred_extension .. '"')
+  if !empty(same_extension)
+    let winid = same_extension[0]["winid"]
+    call win_gotoid(winid)
+  elseif !empty(windows)
+    let winid = windows[0]["winid"]
+    call win_gotoid(winid)
+  else
+    " Unable to find non-terminal window in current tab, create a new split
+    execute 'sp'
+  endif
 endfunction
 
 " https://vi.stackexchange.com/questions/29056/how-to-find-first-item-that-satisfies-predicate
@@ -104,6 +110,35 @@ fu! s:Contains(longer, short) abort
 endfunction
 
 fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
+  let l:target = better_gf#ParseTarget(a:s, a:fromterminal, a:line)
+  let l:preferred_extension_for_window = substitute(l:target["filename"], "^.*\\.", "", "")
+  call better_gf#JumpToNormalBuffer(l:preferred_extension_for_window)
+  " get rid of localdir if present
+  if haslocaldir()
+    execute 'cd' getcwd(-1)
+  endif
+  call better_gf#JumpToTarget(l:target)
+endfunction
+
+fu! better_gf#JumpToTarget(target)
+  " find the file 
+  if a:target["line"] isnot v:null
+    " keepjumps ensures the top of the file is not added to the jumplist
+    silent execute 'keepjumps find ' . a:target["filename"]
+  else
+    silent execute 'find ' . a:target["filename"]
+    return
+  endif
+  if a:target["column"] isnot v:null
+    " go to the indicated line and column
+    silent execute 'normal! ' . a:target["line"] . 'G' . a:target["column"] . '|'
+  else " l:line must also be defined
+    " go to the indicated line
+    silent execute 'normal! ' . a:target["line"] . 'G'
+  endif
+endfunction
+
+fu! better_gf#ParseTarget(s, fromterminal=v:false, line='') abort
   let l:filename = a:s
   if a:fromterminal || &ft == 'git'
     " fugitive buffers sometimes mention files with a/ or b/ prefix
@@ -119,6 +154,8 @@ fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
     return
   endif
   let l:filename=l:elements[0]
+  let l:line = v:null
+  let l:column = v:null
   if l:elementlen > 1
     let l:line=l:elements[1]
     if matchstr(l:line, "^[0-9]*$")=="" " line is not a number, ignore line & column number
@@ -131,35 +168,15 @@ fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
       endif
     endif
   endif
-  " get rid of localdir if present
-  if haslocaldir()
-    execute 'cd' getcwd(-1)
+  if exists('*MruGetFiles')
+    let l:mru = MruGetFiles()
+    let l:cwd = getcwd(-1) . "/"
+    let l:match = s:FindItem(l:mru, {item -> s:Contains(item, l:cwd) && s:EndsWith(item, l:filename)})
+    if l:match isnot v:null
+      let l:filename = l:match
+    endif
   endif
-  try
-    if exists('*MruGetFiles')
-      let l:mru = MruGetFiles()
-      let l:cwd = getcwd(-1) . "/"
-      let l:match = s:FindItem(l:mru, {item -> s:Contains(item, l:cwd) && s:EndsWith(item, l:filename)})
-      if l:match isnot v:null
-        let l:filename = l:match
-      endif
-    endif
-    " find the file 
-    if l:elementlen > 1
-      " keepjumps ensures the top of the file is not added to the jumplist
-      silent execute 'keepjumps find ' . l:filename
-    else
-      silent execute 'find ' . l:filename
-      return
-    endif
-    if l:elementlen >= 3
-      " go to the indicated line and column
-      silent execute 'normal! ' . l:line . 'G' . l:column . '|'
-    else " l:elementlen == 2
-      " go to the indicated line
-      silent execute 'normal! ' . l:line . 'G'
-    endif
-  endtry
+  return {"filename": l:filename, "line": l:line, "column": l:column}
 endfunction
 
 function! better_gf#GetVisualSelection()
