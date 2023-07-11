@@ -189,7 +189,8 @@ function! better_gf#GetVisualSelection()
 endfunction
 
 function! better_gf#CreatefileInNormalBuffer(s)
-  call better_gf#JumpToNormalBuffer()
+  let target_extension = substitute(a:a, "^.*\\.", "", "")
+  call better_gf#JumpToNormalBuffer(target_extension)
   call better_gf#Createfile(a:s)
 endfunction
 
