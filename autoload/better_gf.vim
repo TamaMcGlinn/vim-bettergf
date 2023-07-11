@@ -74,9 +74,18 @@ endfunction
 " is not a terminal, or create a split if there is none
 " prefer splits with given extension
 fu! better_gf#JumpToNormalBuffer(preferred_extension) abort
+  " if current buffer is normal buffer
+  let current_buffer_is_normal = v:false
   if &buftype !=# 'terminal'
-    return
+    let current_buffer_is_normal = v:true
+    let current_extension = expand("%:t:e")
+    " and has same extension
+    if current_extension ==? a:preferred_extension
+      " done; don't switch at all
+      return
+    endif
   endif
+
   " get non-terminal windows in current tab
   let current_tab = tabpagenr()
   let windows = map(filter(getwininfo(),
@@ -86,6 +95,10 @@ fu! better_gf#JumpToNormalBuffer(preferred_extension) abort
   if !empty(same_extension)
     let winid = same_extension[0]["winid"]
     call win_gotoid(winid)
+  elseif l:current_buffer_is_normal
+    " current buffer is option, and there was no preferred_extension
+    " option to choose instead
+    return
   elseif !empty(windows)
     let winid = windows[0]["winid"]
     call win_gotoid(winid)
