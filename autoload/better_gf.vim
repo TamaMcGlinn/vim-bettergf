@@ -10,9 +10,7 @@ endfunction
 fu! better_gf#GetFileLocation(s, line='') abort
   if a:line =~ "^Plug '[^/~][^/~]*/[^/]*'"
     let l:plugin_dir = substitute(substitute(a:line, "^Plug '.*/", '~/.vim/plugged/', ''), "'.*$", '/', '')
-    echom "Opening " . l:plugin_dir
-    execute ":e " . l:plugin_dir
-    return []
+    return [l:plugin_dir]
   endif
 
   let l:selection=a:s
