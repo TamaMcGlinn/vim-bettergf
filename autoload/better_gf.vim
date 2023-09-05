@@ -132,14 +132,25 @@ fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
 endfunction
 
 fu! better_gf#JumpToTarget(target)
+  let l:exact_location = expand("%:h") . "/" . a:target["filename"]
+  let l:newtarget = substitute(a:target["filename"], "^\\(\\.\\./\\)\\+", "", "")
+  " let l:dirs_up = (len(a:target["filename"]) - len(l:newtarget)) / 3
+  if filereadable(l:exact_location)
+    let l:command = 'edit ' . fnameescape(l:exact_location)
+  else
+    let l:command = 'find ' . l:newtarget
+  endif
+
   " find the file 
   if a:target["line"] isnot v:null
     " keepjumps ensures the top of the file is not added to the jumplist
-    silent execute 'keepjumps find ' . a:target["filename"]
+    silent execute 'keepjumps ' . l:command
   else
-    silent execute 'find ' . a:target["filename"]
+    silent execute l:command
+    " if no line, then also no column so we are done
     return
   endif
+
   if a:target["column"] isnot v:null
     " go to the indicated line and column
     silent execute 'normal! ' . a:target["line"] . 'G' . a:target["column"] . '|'
