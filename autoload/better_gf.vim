@@ -35,6 +35,8 @@ fu! better_gf#GetFileLocation(s, line='') abort
   let l:selection=substitute(l:selection, '^\./', '', '')
   " Replace filename(30) with filename:30
   let l:selection=substitute(l:selection, '(\([0-9][0-9]*\))', ':\1', '')
+  " Replace `` around filenames
+  let l:selection=substitute(l:selection, '^.*`\([^`]*\)`.*$', '\1', '')
 
   " TODO strip common parts of current path so that when I am somewhere deeper
   " in my project, I can still gf to a file path specified from the root of that
