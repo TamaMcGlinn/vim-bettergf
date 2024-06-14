@@ -5,8 +5,8 @@ search or error messages.
 
 e.g. `foobar.adb:27:2: "X" not declared in "Y"`
 
-results in opening foobar.adb in some non-terminal buffer (so it keeps the terminal open
-if you executed this from a terminal buffer)
+`gf` on that line results in opening foobar.adb in some non-terminal buffer
+(so it keeps the terminal open if you executed this from a terminal buffer)
 and jumping to the place mentioned by issuing '27G2|' (i.e. it also goes to the right column)
 
 `gf` opens files by default in (neo)vim, and `vt:<C-W>gf` is okay but:
@@ -14,6 +14,8 @@ and jumping to the place mentioned by issuing '27G2|' (i.e. it also goes to the 
 2) including the [colon][linenumber] suffix does not work as intended in NeoVim
 3) this does not include the column, 
 4) it opens in the terminal window, which is inconvenient
+
+## Features
 
 ### create files
 
@@ -30,7 +32,27 @@ Plug 'AndrewRadev/switch.vim'
 
 opens `~/.vim/plugged/switch.vim`
 
-### See also
+### various built-in replacements
+
+There's a list of regexes so that lines like:
+
+```
+Messy quoted things 'filename.txt' work
+And also (in_brackets.md:500) or
+file=README.md
+```
+
+automagically work. For more, use bettergf_magic_replacements (described below).
+
+### open lua configuration files
+
+```
+lua require('file')
+```
+
+opens `~/vimrc/lua/file.lua`
+
+## See also
 
 [SanerGX](https://github.com/TamaMcGlinn/vim-sanergx) is a similar plugin,
 opening URLs in the browser. gx on the plugin line above opens the github page for the plugin.
