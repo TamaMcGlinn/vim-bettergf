@@ -80,9 +80,9 @@ endfunction
 " is not a terminal, or create a split if there is none
 " prefer splits with given extension
 fu! better_gf#JumpToNormalBuffer(preferred_extension) abort
-  " if current buffer is normal buffer
+  " if current buffer is normal (non-fugitive, non-terminal) buffer
   let current_buffer_is_normal = v:false
-  if &buftype !=# 'terminal'
+  if &buftype !=# 'terminal' && !exists('b:fugitive_status')
     let current_buffer_is_normal = v:true
     let current_extension = expand("%:t:e")
     " and has same extension
@@ -92,10 +92,10 @@ fu! better_gf#JumpToNormalBuffer(preferred_extension) abort
     endif
   endif
 
-  " get non-terminal windows in current tab
+  " get non-fugitive, non-terminal windows in current tab
   let current_tab = tabpagenr()
   let windows = map(filter(getwininfo(),
-        \ 'v:val["terminal"] == 0 && v:val["tabnr"] == ' .. l:current_tab), 
+        \ 'has_key(v:val["variables"], "fugitive_status") == 0 && v:val["terminal"] == 0 && v:val["tabnr"] == ' .. l:current_tab), 
         \ '{"winid": v:val["winid"], "bufname": bufname(v:val["bufnr"])}')
   let same_extension = filter(copy(l:windows), 'substitute(v:val["bufname"], "^.*\\.", "", "") ==? "' .. a:preferred_extension .. '"')
   if !empty(same_extension)
