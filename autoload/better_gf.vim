@@ -129,6 +129,9 @@ fu! s:Contains(longer, short) abort
 endfunction
 
 fu! better_gf#Openfile(s, fromterminal=v:false, line='') abort
+  if &ft == 'lspinfo'
+    execute 'bd'
+  endif
   let l:target = better_gf#ParseTarget(a:s, a:fromterminal, a:line)
   let l:preferred_extension_for_window = substitute(l:target["filename"], "^.*\\.", "", "")
   call better_gf#JumpToNormalBuffer(l:preferred_extension_for_window)
