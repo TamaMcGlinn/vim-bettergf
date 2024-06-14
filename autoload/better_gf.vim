@@ -8,7 +8,13 @@ fu! better_gf#HandleCustomReplacements(s) abort
 endfunction
 
 fu! better_gf#GetFileLocation(s, line='') abort
-  if a:line =~ "^Plug '[^/~][^/~]*/[^/]*'"
+  " e.g. lua require('yank_and_paste')
+  if a:line =~# "^lua require([\'\"][^\'\"]*[\'\"]).*$"
+    let l:lua_config = substitute(a:line, "lua require([\'\"]\\\([^\'\"]*\\\).*$", '\1', '')
+    return ["~/vimrc/lua/" . l:lua_config . ".lua"]
+  endif
+  " e.g. Plug 'TamaMcGlinn/CurtineIncSw.vim'
+  if a:line =~# "^Plug '[^/~][^/~]*/[^/]*'"
     let l:plugin_dir = substitute(substitute(a:line, "^Plug '.*/", '~/.vim/plugged/', ''), "'.*$", '/', '')
     return [l:plugin_dir]
   endif
