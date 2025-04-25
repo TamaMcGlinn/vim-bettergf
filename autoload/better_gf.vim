@@ -14,8 +14,8 @@ fu! better_gf#GetFileLocation(s, line='') abort
     return ["~/vimrc/lua/" . l:lua_config . ".lua"]
   endif
   " e.g. Plug 'TamaMcGlinn/CurtineIncSw.vim'
-  if a:line =~# "^Plug '[^/~][^/~]*/[^/]*'"
-    let l:plugin_dir = substitute(substitute(a:line, "^Plug '.*/", '~/.vim/plugged/', ''), "'.*$", '/', '')
+  if a:line =~# "^\"* *Plug '[^/~][^/~]*/[^/]*'"
+    let l:plugin_dir = substitute(substitute(a:line, "^\"* *Plug '.*/", '~/.vim/plugged/', ''), "'.*$", '/', '')
     return [l:plugin_dir]
   endif
 
@@ -79,7 +79,7 @@ endfunction
 " Jump to buffer open in same window that
 " is not a terminal, or create a split if there is none
 " prefer splits with given extension
-fu! better_gf#JumpToNormalBuffer(preferred_extension) abort
+fu! better_gf#JumpToNormalBuffer(preferred_extension = '') abort
   " if current buffer is normal (non-fugitive, non-terminal) buffer
   let current_buffer_is_normal = v:false
   if &buftype !=# 'terminal' && !exists('b:fugitive_status')
