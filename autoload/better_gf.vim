@@ -204,7 +204,7 @@ fu! better_gf#ParseTarget(s, fromterminal=v:false, line='') abort
   if exists('*MruGetFiles')
     let l:mru = MruGetFiles()
     let l:cwd = getcwd(-1) . "/"
-    let l:match = s:FindItem(l:mru, {item -> s:Contains(item, l:cwd) && s:EndsWith(item, l:filename)})
+    let l:match = s:FindItem(l:mru, {item -> s:Contains(item, l:cwd) && s:EndsWith(item, '/' .. l:filename)})
     if l:match isnot v:null
       let l:filename = l:match
     endif
